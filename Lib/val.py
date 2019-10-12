@@ -7,7 +7,7 @@ from  Modular_code.utils import *
 from Modular_code.opts import *
 
 def val_epoch(epoch, num_epochs,data_loader, model, criterion,  logger , batch_size , writer):
-    print('\nValidation Epoch {}'.format(epoch))
+    print('Validation Epoch {}'.format(epoch))
     model.eval()
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -33,6 +33,7 @@ def val_epoch(epoch, num_epochs,data_loader, model, criterion,  logger , batch_s
         accuracies.update(acc, inputs.size(0))
         batch_time.update(time.time() - end_time)
         end_time = time.time()
+        del targets,inputs
         sys.stdout.write(
                 "\r[Epoch %d/%d] [Batch %d / %d] [Time %.2f %.2f] [Data %.2f %.2f] [Loss: %f, Acc: %.2f%%]"
                 % (
@@ -48,6 +49,7 @@ def val_epoch(epoch, num_epochs,data_loader, model, criterion,  logger , batch_s
                     accuracies.avg
                     )
                 )
+    print('')
     logger.log({'epoch': epoch, 'loss': losses.avg, 'acc': accuracies.avg})
     writer.add_scalar('data/valacc',losses.avg , epoch)
     writer.add_scalar('data/valloss',accuracies.avg ,epoch)

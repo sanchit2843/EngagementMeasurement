@@ -5,9 +5,9 @@ import os
 import sys
 from Modular_code.opts import *
 from  Modular_code.utils import *
-
-def train_epoch(epoch, num_epochs, data_loader, model, criterion, optimizer, epoch_logger, batch_logger, batch_size , onecyc , writer):
-    print('Training Epoch {}\n'.format(epoch))
+import os
+def train_epoch(epoch, num_epochs, data_loader, model, criterion, optimizer, epoch_logger, batch_logger, batch_size , onecyc , writer , result_path):
+    print('Training Epoch {}'.format(epoch))
     model.train()
     batch_time = AverageMeter()
     data_time = AverageMeter()
@@ -21,11 +21,9 @@ def train_epoch(epoch, num_epochs, data_loader, model, criterion, optimizer, epo
             continue
         if torch.cuda.is_available():
             targets = targets.cuda()
-                
-        inputs = Variable(inputs)
+            inputs = inputs.cuda()
         with torch.no_grad():
             inputs = inputs.reshape(-1,3,im_size,im_size)
-        targets = Variable(targets)
         outputs = model(inputs)
         loss = criterion(outputs, targets)
         acc = calculate_accuracy(outputs, targets)
@@ -36,7 +34,7 @@ def train_epoch(epoch, num_epochs, data_loader, model, criterion, optimizer, epo
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        
+        del inputs,targets,outputs
         batch_time.update(time.time() - end_time)
         end_time = time.time()
 
@@ -65,7 +63,7 @@ def train_epoch(epoch, num_epochs, data_loader, model, criterion, optimizer, epo
                     accuracies.avg
                     )
                 )
-    print('Epoch time {}'.format(end_time-start_time))
+    print('\nEpoch time {} mins'.format((end_time-start_time)/60))
     epoch_logger.log({
         'epoch': epoch,
         'loss': losses.avg,
@@ -75,12 +73,10 @@ def train_epoch(epoch, num_epochs, data_loader, model, criterion, optimizer, epo
     writer.add_scalar('data/acc_epoch', accuracies.avg, epoch)
     writer.add_scalar('data/loss_epoch', losses.avg, epoch)        
         
-    save_file_path = os.path.join(result_path,
-                                  'save_{}.pth'.format(arch))
+    save_file_path = os.path.join(result_path,'save.pth')
     states = {
         'epoch': epoch + 1,
         'arch': arch,
-        'state_dict': model.state_dict(),
-        'optimizer': optimizer.state_dict(),
+        'state_dict': model.state_dict()
     }
     torch.save(states, save_file_path)

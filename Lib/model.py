@@ -21,8 +21,6 @@ class Model(nn.Module):
         model = models.densenet121(pretrained = True).to('cuda')
         modules= list(model.children())[0]
         model = nn.Sequential(*modules)
-        for param in model.parameters():
-            param.requires_grad = False
         self.model = model
         self.c1 = ConvLSTM(  input_size=(size,size),
                              input_dim= 1024,

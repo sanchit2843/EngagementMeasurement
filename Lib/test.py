@@ -6,7 +6,7 @@ import sys
 from  Modular_code.utils import *
 from Modular_code.opts import *
 
-def test(model, criterion, logger, batch_size):
+def test(model, data_loader ,criterion, batch_size, logger = None):
     print('Testing')
     model.eval()
     losses = AverageMeter()
@@ -35,6 +35,7 @@ def test(model, criterion, logger, batch_size):
                     accuracies.avg
                     )
                 )
-    logger.log({'epoch': epoch, 'loss': losses.avg, 'acc': accuracies.avg})
+    if(logger):
+        logger.log({'epoch': epoch, 'loss': losses.avg, 'acc': accuracies.avg})
     print('\nAccuracy {}'.format(accuracies.avg))
     return losses.avg,accuracies.avg
